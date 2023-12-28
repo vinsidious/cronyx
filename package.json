@@ -1,0 +1,45 @@
+{
+  "name": "cronyx",
+  "version": "3.0.4",
+  "description": "Script-based task scheduler with scalable architecture, and integrated dependency management.",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "format": "prettier **/*.{md,ts,cts,json} -w",
+    "format:check": "prettier **/*.{md,ts,cts,json} --check",
+    "prepublishOnly": "tsc -p tsconfig.build.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yujiosaka/Cronyx.git"
+  },
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "cron-parser": "^4.9.0",
+    "date-fns": "^2.30.0",
+    "date-fns-tz": "^2.0.0",
+    "debug": "^4.3.4",
+    "uuid": "^9.0.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.12",
+    "@types/uuid": "^9.0.7",
+    "mongoose": "^7.6.7",
+    "mysql": "^2.18.1",
+    "pg": "^8.11.3",
+    "prettier": "^3.1.1",
+    "redis": "^4.6.12",
+    "typeorm": "^0.3.17",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "mongoose": "^7.4.0",
+    "redis": "^4.1.0",
+    "typeorm": "^0.3.0"
+  }
+}
