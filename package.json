@@ -1,6 +1,6 @@
 {
   "name": "@vinsidious/cronyx",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "Script-based task scheduler with scalable architecture, and integrated dependency management.",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
@@ -20,7 +20,6 @@
     "dist"
   ],
   "dependencies": {
-    "cron-parser": "^4.9.0",
     "date-fns": "^2.30.0",
     "date-fns-tz": "^2.0.0",
     "debug": "^4.3.4",
@@ -35,7 +34,7 @@
     "pg": "^8.11.3",
     "prettier": "^3.1.1",
     "redis": "^4.6.12",
-    "typeorm": "^0.3.17",
+    "typeorm": "^0.3.19",
     "typescript": "^5.3.3"
   },
   "peerDependencies": {

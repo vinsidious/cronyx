@@ -31,7 +31,7 @@ export type CronyxOptions<S extends BaseJobStore<unknown>> = {
  */
 export type BaseRequestJobOptions = {
     jobName: string;
-    jobInterval: Duration | string | number;
+    jobInterval: Duration | number;
     startBuffer?: Duration | number;
     retryInterval?: Duration | number;
     requiredJobNames?: string[];

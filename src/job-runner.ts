@@ -23,7 +23,7 @@ export default class JobRunner<I> {
   #jobStore: BaseJobStore<I>;
   #timezone: string;
   #jobName: string;
-  #jobInterval: Duration | string | number;
+  #jobInterval: Duration | number;
   #requiredJobNames: string[];
   #startBuffer: Duration | number;
   #retryInterval: Duration | number | undefined;
@@ -33,7 +33,7 @@ export default class JobRunner<I> {
   constructor(
     jobStore: BaseJobStore<I>,
     jobName: string,
-    jobInterval: Duration | string | number,
+    jobInterval: Duration | number,
     options?: JobRunnerOptions,
   ) {
     this.#jobStore = jobStore;
