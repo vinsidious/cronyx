@@ -1,10 +1,10 @@
 import type { Repository } from "typeorm";
 import { DataSource } from "typeorm";
-import type BaseJobStore from "..";
-import { CronyxNotFoundError } from "../../error";
-import { TypeormJobLockEntity } from "../../job-lock/typeorm";
-import type TypeormJobLock from "../../job-lock/typeorm";
-import { hasErrorCode } from "../../util";
+import type BaseJobStore from "../index.js";
+import { CronyxNotFoundError } from "../../error.js";
+import { TypeormJobLockEntity } from "../../job-lock/typeorm.js";
+import type TypeormJobLock from "../../job-lock/typeorm.js";
+import { hasErrorCode } from "../../util.js";
 
 /**
  * @public

@@ -1,6 +1,6 @@
 import type { AuroraPostgresConnectionOptions } from "typeorm/driver/aurora-postgres/AuroraPostgresConnectionOptions.js";
 import type { PostgresConnectionOptions } from "typeorm/driver/postgres/PostgresConnectionOptions.js";
-import TypeormJobStore from "./";
+import TypeormJobStore from "./index.js";
 /**
  * @public
  */

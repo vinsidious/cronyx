@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 import type { Types } from "mongoose";
-import type BaseJobLock from ".";
+import type BaseJobLock from "./index.js";
 
 /**
  * @public

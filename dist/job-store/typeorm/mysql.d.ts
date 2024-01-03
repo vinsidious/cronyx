@@ -1,6 +1,6 @@
 import type { AuroraMysqlConnectionOptions } from "typeorm/driver/aurora-mysql/AuroraMysqlConnectionOptions.js";
 import type { MysqlConnectionOptions } from "typeorm/driver/mysql/MysqlConnectionOptions.js";
-import TypeormJobStore from "./";
+import TypeormJobStore from "./index.js";
 /**
  * @public
  */

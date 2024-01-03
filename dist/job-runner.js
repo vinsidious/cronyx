@@ -1,4 +1,3 @@
-"use strict";
 var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
     if (kind === "m") throw new TypeError("Private method is not writable");
     if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
@@ -11,12 +10,11 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 var _JobRunner_instances, _JobRunner_jobStore, _JobRunner_timezone, _JobRunner_jobName, _JobRunner_jobInterval, _JobRunner_requiredJobNames, _JobRunner_startBuffer, _JobRunner_retryInterval, _JobRunner_noLock, _JobRunner_jobIntervalStartedAt, _JobRunner_ensureLastJobLock, _JobRunner_areRequiredJobsFulfilled;
-Object.defineProperty(exports, "__esModule", { value: true });
-const date_fns_1 = require("date-fns");
-const error_1 = require("./error");
-const job_1 = require("./job");
-const mock_1 = require("./job-lock/mock");
-const util_1 = require("./util");
+import { differenceInMilliseconds, min } from "date-fns";
+import { CronyxArgumentError, CronyxError } from "./error.js";
+import Job from "./job.js";
+import MockJobLock from "./job-lock/mock.js";
+import { addInterval, getLastDeactivatedJobIntervalEndedAt, log, subInterval } from "./util.js";
 /**
  * @internal
  */
@@ -57,55 +55,55 @@ class JobRunner {
     }
     async requestJobStart() {
         const requestedAt = new Date();
-        const bufferedRequestedAt = (0, util_1.subInterval)(requestedAt, __classPrivateFieldGet(this, _JobRunner_startBuffer, "f"), __classPrivateFieldGet(this, _JobRunner_timezone, "f"));
+        const bufferedRequestedAt = subInterval(requestedAt, __classPrivateFieldGet(this, _JobRunner_startBuffer, "f"), __classPrivateFieldGet(this, _JobRunner_timezone, "f"));
         if (__classPrivateFieldGet(this, _JobRunner_jobIntervalStartedAt, "f")) {
             if (!__classPrivateFieldGet(this, _JobRunner_noLock, "f"))
-                throw new error_1.CronyxArgumentError("Should enable `noLock` when `jobIntervalStartedAt` is passed");
+                throw new CronyxArgumentError("Should enable `noLock` when `jobIntervalStartedAt` is passed");
             if (bufferedRequestedAt < __classPrivateFieldGet(this, _JobRunner_jobIntervalStartedAt, "f")) {
-                (0, util_1.log)(`Job is not reached to start time for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`);
+                log(`Job is not reached to start time for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`);
                 return null;
             }
-            const maxJobIntervalEndedAt = (0, util_1.addInterval)(__classPrivateFieldGet(this, _JobRunner_jobIntervalStartedAt, "f"), __classPrivateFieldGet(this, _JobRunner_jobInterval, "f"), __classPrivateFieldGet(this, _JobRunner_timezone, "f"));
-            const jobIntervalEndedAt = (0, date_fns_1.min)([maxJobIntervalEndedAt, bufferedRequestedAt]);
-            const jobInterval = (0, date_fns_1.differenceInMilliseconds)(jobIntervalEndedAt, __classPrivateFieldGet(this, _JobRunner_jobIntervalStartedAt, "f"));
-            const jobLock = mock_1.default.parse({ jobName: __classPrivateFieldGet(this, _JobRunner_jobName, "f"), jobInterval, jobIntervalEndedAt });
-            (0, util_1.log)(`Job from ${__classPrivateFieldGet(this, _JobRunner_jobIntervalStartedAt, "f").toISOString()} to ${jobIntervalEndedAt.toISOString()} is started for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`);
-            return new job_1.default(__classPrivateFieldGet(this, _JobRunner_jobStore, "f"), jobLock);
+            const maxJobIntervalEndedAt = addInterval(__classPrivateFieldGet(this, _JobRunner_jobIntervalStartedAt, "f"), __classPrivateFieldGet(this, _JobRunner_jobInterval, "f"), __classPrivateFieldGet(this, _JobRunner_timezone, "f"));
+            const jobIntervalEndedAt = min([maxJobIntervalEndedAt, bufferedRequestedAt]);
+            const jobInterval = differenceInMilliseconds(jobIntervalEndedAt, __classPrivateFieldGet(this, _JobRunner_jobIntervalStartedAt, "f"));
+            const jobLock = MockJobLock.parse({ jobName: __classPrivateFieldGet(this, _JobRunner_jobName, "f"), jobInterval, jobIntervalEndedAt });
+            log(`Job from ${__classPrivateFieldGet(this, _JobRunner_jobIntervalStartedAt, "f").toISOString()} to ${jobIntervalEndedAt.toISOString()} is started for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`);
+            return new Job(__classPrivateFieldGet(this, _JobRunner_jobStore, "f"), jobLock);
         }
-        const retryIntervalStartedAt = (0, util_1.subInterval)(requestedAt, __classPrivateFieldGet(this, _JobRunner_retryInterval, "f") ?? requestedAt.getTime(), __classPrivateFieldGet(this, _JobRunner_timezone, "f"));
+        const retryIntervalStartedAt = subInterval(requestedAt, __classPrivateFieldGet(this, _JobRunner_retryInterval, "f") ?? requestedAt.getTime(), __classPrivateFieldGet(this, _JobRunner_timezone, "f"));
         const lastJobLock = await __classPrivateFieldGet(this, _JobRunner_instances, "m", _JobRunner_ensureLastJobLock).call(this, requestedAt);
         if (lastJobLock.isActive && lastJobLock.updatedAt > retryIntervalStartedAt) {
             return null;
         }
-        const jobIntervalStartedAt = (0, util_1.getLastDeactivatedJobIntervalEndedAt)(lastJobLock);
-        const maxJobIntervalEndedAt = (0, util_1.addInterval)(jobIntervalStartedAt, __classPrivateFieldGet(this, _JobRunner_jobInterval, "f"), __classPrivateFieldGet(this, _JobRunner_timezone, "f"));
+        const jobIntervalStartedAt = getLastDeactivatedJobIntervalEndedAt(lastJobLock);
+        const maxJobIntervalEndedAt = addInterval(jobIntervalStartedAt, __classPrivateFieldGet(this, _JobRunner_jobInterval, "f"), __classPrivateFieldGet(this, _JobRunner_timezone, "f"));
         if (lastJobLock._id !== null && bufferedRequestedAt < maxJobIntervalEndedAt) {
-            (0, util_1.log)(`Job is not reached to start time for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`);
+            log(`Job is not reached to start time for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`);
             return null;
         }
-        const jobIntervalEndedAt = (0, date_fns_1.min)([maxJobIntervalEndedAt, bufferedRequestedAt]);
+        const jobIntervalEndedAt = min([maxJobIntervalEndedAt, bufferedRequestedAt]);
         const areRequiredJobsFulfilled = await __classPrivateFieldGet(this, _JobRunner_instances, "m", _JobRunner_areRequiredJobsFulfilled).call(this, jobIntervalEndedAt);
         if (!areRequiredJobsFulfilled) {
             return null;
         }
-        const jobInterval = (0, date_fns_1.differenceInMilliseconds)(jobIntervalEndedAt, jobIntervalStartedAt);
+        const jobInterval = differenceInMilliseconds(jobIntervalEndedAt, jobIntervalStartedAt);
         if (__classPrivateFieldGet(this, _JobRunner_noLock, "f")) {
-            const jobLock = mock_1.default.parse({ jobName: __classPrivateFieldGet(this, _JobRunner_jobName, "f"), jobInterval, jobIntervalEndedAt });
-            return new job_1.default(__classPrivateFieldGet(this, _JobRunner_jobStore, "f"), jobLock);
+            const jobLock = MockJobLock.parse({ jobName: __classPrivateFieldGet(this, _JobRunner_jobName, "f"), jobInterval, jobIntervalEndedAt });
+            return new Job(__classPrivateFieldGet(this, _JobRunner_jobStore, "f"), jobLock);
         }
         let jobLock;
         try {
             jobLock = await __classPrivateFieldGet(this, _JobRunner_jobStore, "f").activateJobLock(__classPrivateFieldGet(this, _JobRunner_jobName, "f"), jobInterval, jobIntervalEndedAt, retryIntervalStartedAt);
         }
         catch (error) {
-            throw new error_1.CronyxError(`Cannot activate job lock for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`, { cause: error });
+            throw new CronyxError(`Cannot activate job lock for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`, { cause: error });
         }
         if (!jobLock) {
-            (0, util_1.log)(`Job is currently active for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`);
+            log(`Job is currently active for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`);
             return null;
         }
-        (0, util_1.log)(`Job from ${jobIntervalStartedAt} to ${jobIntervalEndedAt} is started for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`);
-        return new job_1.default(__classPrivateFieldGet(this, _JobRunner_jobStore, "f"), jobLock);
+        log(`Job from ${jobIntervalStartedAt} to ${jobIntervalEndedAt} is started for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`);
+        return new Job(__classPrivateFieldGet(this, _JobRunner_jobStore, "f"), jobLock);
     }
 }
 _JobRunner_jobStore = new WeakMap(), _JobRunner_timezone = new WeakMap(), _JobRunner_jobName = new WeakMap(), _JobRunner_jobInterval = new WeakMap(), _JobRunner_requiredJobNames = new WeakMap(), _JobRunner_startBuffer = new WeakMap(), _JobRunner_retryInterval = new WeakMap(), _JobRunner_noLock = new WeakMap(), _JobRunner_jobIntervalStartedAt = new WeakMap(), _JobRunner_instances = new WeakSet(), _JobRunner_ensureLastJobLock = async function _JobRunner_ensureLastJobLock(requestedAt) {
@@ -114,17 +112,17 @@ _JobRunner_jobStore = new WeakMap(), _JobRunner_timezone = new WeakMap(), _JobRu
         lastJobLock = await __classPrivateFieldGet(this, _JobRunner_jobStore, "f").fetchLastJobLock(__classPrivateFieldGet(this, _JobRunner_jobName, "f"));
     }
     catch (error) {
-        throw new error_1.CronyxError(`Cannot find last job lock for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`, { cause: error });
+        throw new CronyxError(`Cannot find last job lock for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`, { cause: error });
     }
     if (lastJobLock) {
         return lastJobLock;
     }
     try {
-        const jobIntervalEndedAt = (0, util_1.subInterval)(requestedAt, __classPrivateFieldGet(this, _JobRunner_jobInterval, "f"), __classPrivateFieldGet(this, _JobRunner_timezone, "f"));
-        return mock_1.default.parse({ jobName: __classPrivateFieldGet(this, _JobRunner_jobName, "f"), jobIntervalEndedAt, isActive: false });
+        const jobIntervalEndedAt = subInterval(requestedAt, __classPrivateFieldGet(this, _JobRunner_jobInterval, "f"), __classPrivateFieldGet(this, _JobRunner_timezone, "f"));
+        return MockJobLock.parse({ jobName: __classPrivateFieldGet(this, _JobRunner_jobName, "f"), jobIntervalEndedAt, isActive: false });
     }
     catch (error) {
-        throw new error_1.CronyxError(`Cannot create job lock for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`, { cause: error });
+        throw new CronyxError(`Cannot create job lock for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`, { cause: error });
     }
 }, _JobRunner_areRequiredJobsFulfilled = async function _JobRunner_areRequiredJobsFulfilled(jobIntervalEndedAt) {
     for (const requiredJobName of __classPrivateFieldGet(this, _JobRunner_requiredJobNames, "f")) {
@@ -133,19 +131,19 @@ _JobRunner_jobStore = new WeakMap(), _JobRunner_timezone = new WeakMap(), _JobRu
             requiredJobLock = await __classPrivateFieldGet(this, _JobRunner_jobStore, "f").fetchLastJobLock(requiredJobName);
         }
         catch (error) {
-            throw new error_1.CronyxError(`Cannot find required job lock for ${requiredJobName}`, { cause: error });
+            throw new CronyxError(`Cannot find required job lock for ${requiredJobName}`, { cause: error });
         }
         if (!requiredJobLock) {
-            (0, util_1.log)(`Required jobs ${requiredJobName} is not fulfilled for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`);
+            log(`Required jobs ${requiredJobName} is not fulfilled for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`);
             return false;
         }
-        const requiredJobIntervalEndedAt = (0, util_1.getLastDeactivatedJobIntervalEndedAt)(requiredJobLock);
+        const requiredJobIntervalEndedAt = getLastDeactivatedJobIntervalEndedAt(requiredJobLock);
         if (requiredJobIntervalEndedAt < jobIntervalEndedAt) {
-            (0, util_1.log)(`Required jobs ${requiredJobName} is not fulfilled for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`);
+            log(`Required jobs ${requiredJobName} is not fulfilled for ${__classPrivateFieldGet(this, _JobRunner_jobName, "f")}`);
             return false;
         }
     }
     return true;
 };
-exports.default = JobRunner;
+export default JobRunner;
 //# sourceMappingURL=job-runner.js.map

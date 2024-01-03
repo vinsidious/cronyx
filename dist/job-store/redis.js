@@ -1,4 +1,3 @@
-"use strict";
 var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
     if (kind === "m") throw new TypeError("Private method is not writable");
     if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
@@ -11,11 +10,10 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 var _RedisJobStore_instances, _RedisJobStore_client, _RedisJobStore_getActiveJobLock;
-Object.defineProperty(exports, "__esModule", { value: true });
-const date_fns_1 = require("date-fns");
-const redis_1 = require("redis");
-const error_1 = require("../error");
-const redis_2 = require("../job-lock/redis");
+import { isEqual } from "date-fns";
+import { createClient, WatchError } from "redis";
+import { CronyxNotFoundError } from "../error.js";
+import RedisJobLock from "../job-lock/redis.js";
 const ACTIVE_JOB_LOCK_PREFIX = "joblocks:active:";
 const JOB_LOCK_PREFIX = "joblocks:";
 /**
@@ -31,7 +29,7 @@ class RedisJobStore {
         __classPrivateFieldSet(this, _RedisJobStore_client, client, "f");
     }
     static async connect(options) {
-        const client = (0, redis_1.createClient)(options);
+        const client = createClient(options);
         await client.connect();
         return new RedisJobStore(client);
     }
@@ -48,10 +46,10 @@ class RedisJobStore {
             .get(`${JOB_LOCK_PREFIX}${jobName}`)
             .exec());
         if (activeJobLockJson) {
-            return redis_2.default.parse(JSON.parse(activeJobLockJson));
+            return RedisJobLock.parse(JSON.parse(activeJobLockJson));
         }
         if (jobLockJson) {
-            return redis_2.default.parse(JSON.parse(jobLockJson));
+            return RedisJobLock.parse(JSON.parse(jobLockJson));
         }
         return null;
     }
@@ -72,11 +70,11 @@ class RedisJobStore {
                             }
                             return null;
                         }
-                        if ((0, date_fns_1.isEqual)(lastJobLock.jobIntervalEndedAt, jobIntervalEndedAt)) {
+                        if (isEqual(lastJobLock.jobIntervalEndedAt, jobIntervalEndedAt)) {
                             return null;
                         }
                     }
-                    const activatedJobLock = redis_2.default.parse({
+                    const activatedJobLock = RedisJobLock.parse({
                         jobName,
                         jobIntervalEndedAt,
                         jobInterval,
@@ -90,7 +88,7 @@ class RedisJobStore {
             });
         }
         catch (error) {
-            if (error instanceof redis_1.WatchError) {
+            if (error instanceof WatchError) {
                 return null;
             }
             throw error;
@@ -99,7 +97,7 @@ class RedisJobStore {
     async deactivateJobLock(jobName, jobId) {
         const activeJobLock = await __classPrivateFieldGet(this, _RedisJobStore_instances, "m", _RedisJobStore_getActiveJobLock).call(this, jobName);
         if (!activeJobLock || activeJobLock._id !== jobId) {
-            throw new error_1.CronyxNotFoundError(`Cannot find job lock for ${jobName}`);
+            throw new CronyxNotFoundError(`Cannot find job lock for ${jobName}`);
         }
         const detivatedJobLock = { ...activeJobLock, isActive: false, updatedAt: new Date() };
         await __classPrivateFieldGet(this, _RedisJobStore_client, "f")
@@ -112,7 +110,7 @@ class RedisJobStore {
     async removeJobLock(jobName, jobId) {
         const activeJobLock = await __classPrivateFieldGet(this, _RedisJobStore_instances, "m", _RedisJobStore_getActiveJobLock).call(this, jobName);
         if (!activeJobLock || activeJobLock._id !== jobId) {
-            throw new error_1.CronyxNotFoundError(`Cannot find job lock for ${jobName}`);
+            throw new CronyxNotFoundError(`Cannot find job lock for ${jobName}`);
         }
         await __classPrivateFieldGet(this, _RedisJobStore_client, "f").del(`${ACTIVE_JOB_LOCK_PREFIX}${jobName}`);
     }
@@ -121,7 +119,7 @@ _RedisJobStore_client = new WeakMap(), _RedisJobStore_instances = new WeakSet(),
     const activeJobLockJson = await __classPrivateFieldGet(this, _RedisJobStore_client, "f").get(`${ACTIVE_JOB_LOCK_PREFIX}${jobName}`);
     if (!activeJobLockJson)
         return null;
-    return redis_2.default.parse(JSON.parse(activeJobLockJson));
+    return RedisJobLock.parse(JSON.parse(activeJobLockJson));
 };
-exports.default = RedisJobStore;
+export default RedisJobStore;
 //# sourceMappingURL=redis.js.map

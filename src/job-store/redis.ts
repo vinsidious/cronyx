@@ -1,8 +1,8 @@
 import { isEqual } from "date-fns";
 import { createClient, RedisClientOptions, WatchError } from "redis";
-import type BaseJobStore from ".";
-import { CronyxNotFoundError } from "../error";
-import RedisJobLock from "../job-lock/redis";
+import type BaseJobStore from "./index.js";
+import { CronyxNotFoundError } from "../error.js";
+import RedisJobLock from "../job-lock/redis.js";
 
 const ACTIVE_JOB_LOCK_PREFIX = "joblocks:active:";
 const JOB_LOCK_PREFIX = "joblocks:";

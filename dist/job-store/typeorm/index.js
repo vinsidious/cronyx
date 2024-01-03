@@ -1,4 +1,3 @@
-"use strict";
 var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
     if (kind === "m") throw new TypeError("Private method is not writable");
     if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
@@ -11,10 +10,9 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
 var _TypeormJobStore_dataSource, _TypeormJobStore_repository;
-Object.defineProperty(exports, "__esModule", { value: true });
-const error_1 = require("../../error");
-const typeorm_1 = require("../../job-lock/typeorm");
-const util_1 = require("../../util");
+import { CronyxNotFoundError } from "../../error.js";
+import { TypeormJobLockEntity } from "../../job-lock/typeorm.js";
+import { hasErrorCode } from "../../util.js";
 /**
  * @public
  */
@@ -26,7 +24,7 @@ class TypeormJobStore {
         _TypeormJobStore_dataSource.set(this, void 0);
         _TypeormJobStore_repository.set(this, void 0);
         __classPrivateFieldSet(this, _TypeormJobStore_dataSource, dataSource, "f");
-        __classPrivateFieldSet(this, _TypeormJobStore_repository, dataSource.getRepository(typeorm_1.TypeormJobLockEntity), "f");
+        __classPrivateFieldSet(this, _TypeormJobStore_repository, dataSource.getRepository(TypeormJobLockEntity), "f");
     }
     async sync() {
         await __classPrivateFieldGet(this, _TypeormJobStore_dataSource, "f").synchronize();
@@ -43,7 +41,7 @@ class TypeormJobStore {
     async activateJobLock(jobName, jobInterval, jobIntervalEndedAt, retryIntervalStartedAt) {
         return await __classPrivateFieldGet(this, _TypeormJobStore_repository, "f").manager.transaction(async (transactionalEntityManager) => {
             const now = new Date();
-            const activeJobLock = await transactionalEntityManager.findOne(typeorm_1.TypeormJobLockEntity, {
+            const activeJobLock = await transactionalEntityManager.findOne(TypeormJobLockEntity, {
                 where: { jobName, jobIntervalEndedAt, isActive: true },
             });
             if (activeJobLock) {
@@ -54,7 +52,7 @@ class TypeormJobStore {
                 }
                 return null;
             }
-            const activatedJobLock = transactionalEntityManager.create(typeorm_1.TypeormJobLockEntity, {
+            const activatedJobLock = transactionalEntityManager.create(TypeormJobLockEntity, {
                 jobName,
                 jobInterval,
                 jobIntervalEndedAt,
@@ -68,7 +66,7 @@ class TypeormJobStore {
                 return await transactionalEntityManager.save(activatedJobLock);
             }
             catch (error) {
-                if ((0, util_1.hasErrorCode)(error) && error.code === this.uniqueConstraintErrorCode)
+                if (hasErrorCode(error) && error.code === this.uniqueConstraintErrorCode)
                     return null;
                 throw error;
             }
@@ -77,15 +75,15 @@ class TypeormJobStore {
     async deactivateJobLock(jobName, jobId) {
         const deactivatedJobLock = await __classPrivateFieldGet(this, _TypeormJobStore_repository, "f").findOne({ where: { _id: jobId, jobName, isActive: true } });
         if (!deactivatedJobLock)
-            throw new error_1.CronyxNotFoundError(`Cannot find job lock for ${jobName}`);
+            throw new CronyxNotFoundError(`Cannot find job lock for ${jobName}`);
         return await __classPrivateFieldGet(this, _TypeormJobStore_repository, "f").save({ ...deactivatedJobLock, isActive: false, updatedAt: new Date() });
     }
     async removeJobLock(jobName, jobId) {
         const result = await __classPrivateFieldGet(this, _TypeormJobStore_repository, "f").delete({ _id: jobId, jobName, isActive: true });
         if (result.affected === 0)
-            throw new error_1.CronyxNotFoundError(`Cannot find job lock for ${jobName}`);
+            throw new CronyxNotFoundError(`Cannot find job lock for ${jobName}`);
     }
 }
 _TypeormJobStore_dataSource = new WeakMap(), _TypeormJobStore_repository = new WeakMap();
-exports.default = TypeormJobStore;
+export default TypeormJobStore;
 //# sourceMappingURL=index.js.map

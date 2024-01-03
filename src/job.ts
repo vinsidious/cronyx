@@ -1,8 +1,8 @@
 import { subMilliseconds } from "date-fns";
-import { CronyxError } from "./error";
-import type BaseJobLock from "./job-lock";
-import type BaseJobStore from "./job-store";
-import { log } from "./util";
+import { CronyxError } from "./error.js";
+import type BaseJobLock from "./job-lock/index.js";
+import type BaseJobStore from "./job-store/index.js";
+import { log } from "./util.js";
 
 /**
  * @public

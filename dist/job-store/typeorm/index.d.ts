@@ -1,5 +1,5 @@
-import type BaseJobStore from "..";
-import type TypeormJobLock from "../../job-lock/typeorm";
+import type BaseJobStore from "../index.js";
+import type TypeormJobLock from "../../job-lock/typeorm.js";
 /**
  * @public
  */

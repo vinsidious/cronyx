@@ -4,6 +4,7 @@
   "description": "Script-based task scheduler with scalable architecture, and integrated dependency management.",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
+  "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "format": "prettier **/*.{md,ts,cts,json} -w",

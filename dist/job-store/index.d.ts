@@ -1,4 +1,4 @@
-import type BaseJobLock from "../job-lock";
+import type BaseJobLock from "../job-lock/index.js";
 /**
  * @public
  */

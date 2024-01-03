@@ -1,10 +1,10 @@
 import { MongoError } from "mongodb";
 import type { Connection, ConnectOptions, Model, Types } from "mongoose";
 import { createConnection } from "mongoose";
-import type BaseJobStore from ".";
-import { CronyxNotFoundError } from "../error";
-import type MongodbJobLock from "../job-lock/mongodb";
-import { mongodbJobLockSchema } from "../job-lock/mongodb";
+import type BaseJobStore from "./index.js";
+import { CronyxNotFoundError } from "../error.js";
+import type MongodbJobLock from "../job-lock/mongodb.js";
+import { mongodbJobLockSchema } from "../job-lock/mongodb.js";
 
 /**
  * @public

@@ -1,9 +1,9 @@
 import { DataSource } from "typeorm";
 import type { AuroraPostgresConnectionOptions } from "typeorm/driver/aurora-postgres/AuroraPostgresConnectionOptions.js";
 import type { PostgresConnectionOptions } from "typeorm/driver/postgres/PostgresConnectionOptions.js";
-import { CronyxArgumentError } from "../../error";
-import { TypeormJobLockEntity } from "../../job-lock/typeorm";
-import TypeormJobStore from "./";
+import { CronyxArgumentError } from "../../error.js";
+import { TypeormJobLockEntity } from "../../job-lock/typeorm.js";
+import TypeormJobStore from "./index.js";
 
 /**
  * @public

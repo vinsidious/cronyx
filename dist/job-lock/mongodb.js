@@ -1,11 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.mongodbJobLockSchema = void 0;
-const mongoose_1 = require("mongoose");
+import { Schema } from "mongoose";
 /**
  * @internal
  */
-exports.mongodbJobLockSchema = new mongoose_1.Schema({
+export const mongodbJobLockSchema = new Schema({
     jobName: { type: String, required: true },
     jobInterval: { type: Number, required: true, default: 0 },
     jobIntervalEndedAt: { type: Date, required: true },

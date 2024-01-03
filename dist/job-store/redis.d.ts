@@ -1,6 +1,6 @@
 import { RedisClientOptions } from "redis";
-import type BaseJobStore from ".";
-import RedisJobLock from "../job-lock/redis";
+import type BaseJobStore from "./index.js";
+import RedisJobLock from "../job-lock/redis.js";
 /**
  * @public
  */

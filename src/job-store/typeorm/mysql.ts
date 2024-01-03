@@ -1,9 +1,9 @@
 import { DataSource } from "typeorm";
 import type { AuroraMysqlConnectionOptions } from "typeorm/driver/aurora-mysql/AuroraMysqlConnectionOptions.js";
 import type { MysqlConnectionOptions } from "typeorm/driver/mysql/MysqlConnectionOptions.js";
-import { CronyxArgumentError } from "../../error";
-import { TypeormJobLockEntity } from "../../job-lock/typeorm";
-import TypeormJobStore from "./";
+import { CronyxArgumentError } from "../../error.js";
+import { TypeormJobLockEntity } from "../../job-lock/typeorm.js";
+import TypeormJobStore from "./index.js";
 
 /**
  * @public

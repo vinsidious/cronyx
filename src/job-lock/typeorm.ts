@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import type BaseJobLock from ".";
+import type BaseJobLock from "./index.js";
 
 /**
  * @public

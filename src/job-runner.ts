@@ -1,11 +1,11 @@
 import type { Duration } from "date-fns";
 import { differenceInMilliseconds, min } from "date-fns";
-import { CronyxArgumentError, CronyxError } from "./error";
-import Job from "./job";
-import type BaseJobLock from "./job-lock";
-import MockJobLock from "./job-lock/mock";
-import type BaseJobStore from "./job-store";
-import { addInterval, getLastDeactivatedJobIntervalEndedAt, log, subInterval } from "./util";
+import { CronyxArgumentError, CronyxError } from "./error.js";
+import Job from "./job.js";
+import type BaseJobLock from "./job-lock/index.js";
+import MockJobLock from "./job-lock/mock.js";
+import type BaseJobStore from "./job-store/index.js";
+import { addInterval, getLastDeactivatedJobIntervalEndedAt, log, subInterval } from "./util.js";
 
 type JobRunnerOptions = {
   timezone?: string;
