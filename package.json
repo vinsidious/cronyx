@@ -1,6 +1,6 @@
 {
   "name": "@vinsidious/cronyx",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "description": "Script-based task scheduler with scalable architecture, and integrated dependency management.",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
